@@ -1,0 +1,10 @@
+# Caddyfile for TriggerApp
+# This handles TLS termination and reverse proxy
+
+:80 {
+    respond "TriggerApp Backend"
+}
+
+:8080 {
+    reverse_proxy localhost:8080
+}

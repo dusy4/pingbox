@@ -1,0 +1,91 @@
+# ==============================================================================
+# PingBox (TriggerApp) - Git Ignore
+# ==============================================================================
+
+# --- Sensitive Data (NEVER commit these) ---
+.env
+*.env
+!.env.example
+**/.env
+**/*.env
+**/triggerapp2026-firebase-adminsdk-*.json
+**/firebase-adminsdk-*.json
+**/google-services.json
+**/serviceAccountKey.json
+*.jks
+*.keystore
+*.p12
+*.pem
+**/secrets/
+**/firebase-*.json
+**/session-ses_*.json
+**/session-ses_*.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+
+# --- Android / Gradle ---
+*.iml
+.gradle/
+local.properties
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+android/.gradle/
+android/**/*.iml
+android/app/build/
+android/**/build/
+android/captures/
+android/gradle-dependencies/
+
+# --- IDE ---
+.vscode/
+*.sublime-workspace
+*.sublime-project
+android/.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Session / Temp files ---
+session-*.json
+session-*.md
+dummy
+rustup-init.exe
+
+# --- Build artifacts ---
+*.apk
+*.aab
+*.ap_
+
+# --- Node (if any) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Misc ---
+*.orig
+.patch
