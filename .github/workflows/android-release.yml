@@ -1,70 +1,46 @@
-<<<<<<< HEAD
-name: Android APK CI + Release
-
-on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Optional: tag to publish release (example: v1.0.0). Leave empty for CI-only build."
-        required: false
-=======
+cat > .github/workflows/android-release.yml <<'YAML'
 name: Android Release APK
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Tag to create and publish (example: v1.0.0)"
-        required: true
   push:
     tags:
       - 'v*'
->>>>>>> origin/main
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (example: v1.0.0). Optional on manual runs.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
-<<<<<<< HEAD
-  build-apk:
+  build_and_release:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-=======
-  build-release-apk:
-    runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Ensure tag exists (workflow_dispatch)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Resolve release tag
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "${{ github.event.inputs.release_tag }}" "${{ github.sha }}" || true
-          git push origin "${{ github.event.inputs.release_tag }}"
-
-      - name: Set release tag env
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.release_tag }}" ]; then
             echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> "$GITHUB_ENV"
           else
             echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           fi
->>>>>>> origin/main
+
+      - name: Create/push tag for manual runs
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '' }}
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$RELEASE_TAG" "${{ github.sha }}" || true
+          git push origin "$RELEASE_TAG"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -82,54 +58,14 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-<<<<<<< HEAD
           name: app-release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
 
-  publish-release:
-    needs: build-apk
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Resolve release tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> "$GITHUB_ENV"
-          else
-            echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
-          fi
-
-      - name: Ensure tag exists (workflow_dispatch)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "$RELEASE_TAG" "${{ github.sha }}" || true
-          git push origin "$RELEASE_TAG"
-
-      - name: Download APK artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-release-apk
-          path: dist
-
-=======
-          name: app-release-apk-${{ env.RELEASE_TAG }}
-          path: android/app/build/outputs/apk/release/app-release.apk
-
->>>>>>> origin/main
-      - name: Attach APK to GitHub release
+      - name: Publish APK to GitHub Release
+        if: ${{ startsWith(env.RELEASE_TAG, 'v') }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           generate_release_notes: true
-<<<<<<< HEAD
-          files: dist/app-release.apk
-=======
           files: android/app/build/outputs/apk/release/app-release.apk
->>>>>>> origin/main
+YAML
