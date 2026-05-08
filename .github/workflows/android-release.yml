@@ -1,17 +1,19 @@
-name: "Android APK CI and Release"
+name: Android Release APK
 
-on:
+'on':
   push:
-    branches: [main]
-    tags: ['v*']
+    branches:
+      - main
+    tags:
+      - 'v*'
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Optional tag to publish (example: v1.0.0). Leave empty for build-only run."
+        description: Optional tag to publish (example v1.0.0). Leave empty for build only.
         required: false
-        type: string
 
 permissions:
   contents: write
@@ -45,7 +47,7 @@ jobs:
   publish_release:
     needs: build_apk
     runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '') }}
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,7 +63,7 @@ jobs:
           fi
 
       - name: Ensure tag exists for manual run
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
