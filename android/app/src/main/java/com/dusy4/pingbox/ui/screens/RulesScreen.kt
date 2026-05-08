@@ -190,8 +190,9 @@ fun RulesScreen(
             existingRule = editingRule,
             onDismiss = { showAddDialog = false; editingRule = null },
             onSave = { ruleCreateRequest ->
-                if (editingRule != null) {
-                    val updatedRule = editingRule.copy(
+                val ruleBeingEdited = editingRule
+                if (ruleBeingEdited != null) {
+                    val updatedRule = ruleBeingEdited.copy(
                         name = ruleCreateRequest.name,
                         matchTag = ruleCreateRequest.matchTag,
                         targetType = ruleCreateRequest.targetType,
